@@ -7,3 +7,5 @@ jspm_packages
 
 # local env variables
 *.env
+
+seed-data/*.json
