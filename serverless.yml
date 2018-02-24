@@ -1,0 +1,185 @@
+service: serverless-graphql-dynamo
+
+frameworkVersion: ">=1.21.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  stage: dev
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:BatchGetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:us-east-1:*:table/entry"
+
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    port: 4000
+  webpackIncludeModules: true
+  dynamodb:
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+      seed: true
+    seed:
+      test:
+        sources:
+          - table: Entry
+            sources: [seed-data/entry.json]
+          - table: Note
+            sources: [seed-data/note.json]
+          - table: NoteType
+            sources: [seed-data/noteType.json]
+
+functions:
+  graphql:
+    handler: handler.graphqlHandler
+    events:
+    - http:
+        path: graphql
+        method: post
+        cors: true
+  playground:
+    handler: handler.playgroundHandler
+    events:
+    - http:
+        path: playground
+        method: get
+        cors: true
+  graphiql:
+    handler: handler.graphiqlHandler
+    events:
+    - http:
+        path: graphiql
+        method: get
+        cors: true
+
+resources:
+  Resources:
+    NoteTypeTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: 'NoteType'
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+          -
+            AttributeName: user
+            KeyType: RANGE
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+          -
+            AttributeName: user
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 10
+          WriteCapacityUnits: 10
+
+    EntryTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: 'Entry'
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+          -
+            AttributeName: gameDate
+            KeyType: RANGE
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+          -
+            AttributeName: user
+            AttributeType: S
+          -
+            AttributeName: gameDate
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 10
+          WriteCapacityUnits: 10
+        GlobalSecondaryIndexes:
+        -
+          IndexName: "EntryUserIndex"
+          KeySchema:
+            -
+              AttributeName: user
+              KeyType: HASH
+            -
+              AttributeName: gameDate
+              KeyType: RANGE
+          Projection:
+            NonKeyAttributes:
+              - champion
+              - opponentChampion
+              - gameDate
+              - kills
+              - deaths
+              - assists
+              - outcome
+            ProjectionType: INCLUDE
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+    NoteTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: 'Note'
+        KeySchema:
+          -
+            AttributeName: entry
+            KeyType: HASH
+          -
+            AttributeName: id
+            KeyType: RANGE
+        AttributeDefinitions:
+          -
+            AttributeName: entry
+            AttributeType: S
+          -
+            AttributeName: id
+            AttributeType: S
+          -
+            AttributeName: user
+            AttributeType: S
+          -
+            AttributeName: marked
+            AttributeType: N
+        ProvisionedThroughput:
+          ReadCapacityUnits: 10
+          WriteCapacityUnits: 10
+        GlobalSecondaryIndexes:
+        -
+          IndexName: "NoteUserIndex"
+          KeySchema:
+            -
+              AttributeName: user
+              KeyType: HASH
+            -
+              AttributeName: marked
+              KeyType: RANGE
+          Projection:
+            NonKeyAttributes:
+              - type
+              - text
+            ProjectionType: INCLUDE
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
