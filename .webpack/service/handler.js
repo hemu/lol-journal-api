@@ -128,6 +128,12 @@ function getEntriesByUser(args) {
   const oneYearAgo = new Date();
   oneYearAgo.setDate(oneYearAgo.getDate() - 360);
 
+  const exclusiveStartKey = args.lastEvaluatedGameDate && args.lastEvaluatedID ? {
+    gameDate: args.lastEvaluatedGameDate,
+    user: args.user,
+    id: args.lastEvaluatedID
+  } : undefined;
+
   return promisify(callback => docClient.query({
     TableName: 'Entry',
     IndexName: 'EntryUserIndex',
@@ -141,8 +147,15 @@ function getEntriesByUser(args) {
       // ':gDate': new Date().toISOString(),
       // ':gameDateEnd': oneYearAgo.toISOString(),
     },
-    ScanIndexForward: false
-  }, callback)).then(result => result.Items);
+    ScanIndexForward: false,
+    Limit: 20,
+    ExclusiveStartKey: exclusiveStartKey
+  }, callback)).then(result => {
+    return {
+      entries: result.Items,
+      lastEvaluatedKey: result.LastEvaluatedKey ? result.LastEvaluatedKey : null
+    };
+  });
 }
 
 function entryById(args) {
@@ -620,8 +633,23 @@ type Entry {
   gameId: String
 }
 
+type EntryKey {
+  gameDate: String
+  user: String
+  id: ID
+}
+
+type EntriesResult {
+  entries: [Entry]
+  lastEvaluatedKey: EntryKey
+}
+
 type Query {
-  entriesByUser(user: String!) : [Entry]
+  entriesByUser(
+    user: String!
+    lastEvaluatedGameDate: String
+    lastEvaluatedID: ID
+  ) : EntriesResult
   entryById(id: ID!) : Entry
 }
 

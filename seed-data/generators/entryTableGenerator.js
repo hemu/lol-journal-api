@@ -3,12 +3,14 @@ import faker from 'faker';
 import uuid from 'uuid';
 import { roles, champions } from './const';
 
+const NUM_ENTRIES = 30;
+
 const randomRole = () => faker.random.arrayElement(roles);
 const randomChamp = () => faker.random.arrayElement(champions);
 
 const createEntry = () => ({
   id: uuid.v4(),
-  user: 'fake-user-id',
+  user: 'auth0|5ac38b2a49c317236e3c36da',
   assists: faker.random.number(10),
   champion: randomChamp(),
   createdAt: faker.date.recent(),
@@ -35,7 +37,7 @@ const createEntry = () => ({
 
 export default () => {
   const data = [];
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < NUM_ENTRIES; i++) {
     data.push(createEntry());
   }
 

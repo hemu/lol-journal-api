@@ -22,6 +22,14 @@ function getEntriesByUser(args) {
   const oneYearAgo = new Date();
   oneYearAgo.setDate(oneYearAgo.getDate() - 360);
 
+  const exclusiveStartKey = (
+    args.lastEvaluatedGameDate && args.lastEvaluatedID
+  ) ? {
+    gameDate: args.lastEvaluatedGameDate,
+    user: args.user,
+    id: args.lastEvaluatedID,
+  } : undefined;
+
   return promisify(callback =>
     docClient.query(
       {
@@ -38,10 +46,17 @@ function getEntriesByUser(args) {
           // ':gameDateEnd': oneYearAgo.toISOString(),
         },
         ScanIndexForward: false,
+        Limit: 20,
+        ExclusiveStartKey: exclusiveStartKey,
       },
       callback
     )
-  ).then(result => result.Items);
+  ).then(result => {
+    return {
+      entries: result.Items,
+      lastEvaluatedKey: result.LastEvaluatedKey ? result.LastEvaluatedKey : null,
+    };
+  });
 }
 
 export function entryById(args) {

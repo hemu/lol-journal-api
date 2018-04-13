@@ -134,6 +134,7 @@ resources:
               - deaths
               - assists
               - outcome
+              - gameId
             ProjectionType: INCLUDE
           ProvisionedThroughput:
             ReadCapacityUnits: 5

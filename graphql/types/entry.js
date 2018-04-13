@@ -22,8 +22,23 @@ type Entry {
   gameId: String
 }
 
+type EntryKey {
+  gameDate: String
+  user: String
+  id: ID
+}
+
+type EntriesResult {
+  entries: [Entry]
+  lastEvaluatedKey: EntryKey
+}
+
 type Query {
-  entriesByUser(user: String!) : [Entry]
+  entriesByUser(
+    user: String!
+    lastEvaluatedGameDate: String
+    lastEvaluatedID: ID
+  ) : EntriesResult
   entryById(id: ID!) : Entry
 }
 
