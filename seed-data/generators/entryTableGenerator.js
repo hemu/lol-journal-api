@@ -3,7 +3,7 @@ import faker from 'faker';
 import uuid from 'uuid';
 import { roles, champions } from './const';
 
-const NUM_ENTRIES = 30;
+const NUM_ENTRIES = 6;
 
 const randomRole = () => faker.random.arrayElement(roles);
 const randomChamp = () => faker.random.arrayElement(champions);

@@ -64,21 +64,13 @@ type Mutation {
 
   updateEntry(
     id: ID!
-    gameDate: String
-    rank: String
-    outcome: String
+    gameDate: String!
     role: String
-    kills: Int
-    deaths: Int
-    assists: Int
     champion: String
     opponentChampion: String
     partner: String
     opponentPartner: String
-    csPerMin: Float
-    cs: [[Int]]
     video: String
-    gameId: String
   ) : Entry
 
   deleteEntry(id: ID!) : Boolean
