@@ -128,6 +128,12 @@ function getEntriesByUser(args) {
   const oneYearAgo = new Date();
   oneYearAgo.setDate(oneYearAgo.getDate() - 360);
 
+  const exclusiveStartKey = args.lastEvaluatedGameDate && args.lastEvaluatedID ? {
+    gameDate: args.lastEvaluatedGameDate,
+    user: args.user,
+    id: args.lastEvaluatedID
+  } : undefined;
+
   return promisify(callback => docClient.query({
     TableName: 'Entry',
     IndexName: 'EntryUserIndex',
@@ -141,8 +147,15 @@ function getEntriesByUser(args) {
       // ':gDate': new Date().toISOString(),
       // ':gameDateEnd': oneYearAgo.toISOString(),
     },
-    ScanIndexForward: false
-  }, callback)).then(result => result.Items);
+    ScanIndexForward: false,
+    Limit: 20,
+    ExclusiveStartKey: exclusiveStartKey
+  }, callback)).then(result => {
+    return {
+      entries: result.Items,
+      lastEvaluatedKey: result.LastEvaluatedKey ? result.LastEvaluatedKey : null
+    };
+  });
 }
 
 function entryById(args) {
@@ -160,34 +173,58 @@ function entryById(args) {
   });
 }
 
+function getUpdateExpAndAttrVals(args) {
+  let expression = "set updatedAt = :updatedAt";
+  let includeExpAttrName = false;
+  const expAttrName = {};
+  const attrVals = {
+    ':updatedAt': new Date().toISOString()
+  };
+  if (args.role) {
+    expression = `${expression}, #rol = :role`;
+    attrVals[':role'] = args.role;
+    expAttrName['#rol'] = 'role';
+    includeExpAttrName = true;
+  };
+  if (args.champion) {
+    expression = `${expression}, champion = :champion`;
+    attrVals[':champion'] = args.champion;
+  };
+  if (args.opponentChampion) {
+    expression = `${expression}, opponentChampion = :opponentChampion`;
+    attrVals[':opponentChampion'] = args.opponentChampion;
+  };
+  if (args.partner) {
+    expression = `${expression}, partner = :partner`;
+    attrVals[':partner'] = args.partner;
+  };
+  if (args.opponentPartner) {
+    expression = `${expression}, opponentPartner = :opponentPartner`;
+    attrVals[':opponentPartner'] = args.opponentPartner;
+  };
+  if (args.video) {
+    expression = `${expression}, video = :video`;
+    attrVals[':video'] = args.video;
+  };
+  return { expression, attrVals, expAttrName: includeExpAttrName ? expAttrName : null };
+}
+
 function updateEntry(args) {
-  return promisify(callback => docClient.update({
+  const { expression, attrVals, expAttrName } = getUpdateExpAndAttrVals(args);
+
+  updateFields = {
     TableName: 'Entry',
-    Key: { id: args.id },
-    UpdateExpression: 'set #rnk = :rank, updatedAt = :updatedAt, outcome = :outcome, #rol = :role, kills = :kills, deaths = :deaths, assists = :assists, champion = :champion, opponentChampion = :opponentChampion, partner = :partner, opponentPartner = :opponentPartner, csPerMin = :csPerMin, csAt5Min = :csAt5Min, csAt10Min = :csAt10Min, csAt15Min = :csAt15Min, csAt20Min = :csAt20Min, video = :video, gameDate = :gameDate',
-    ExpressionAttributeNames: { '#rnk': 'rank', '#rol': 'role' },
-    ExpressionAttributeValues: {
-      ':gameDate': args.gameDate,
-      ':rank': args.rank,
-      ':outcome': args.outcome,
-      ':role': args.role,
-      ':kills': args.kills,
-      ':deaths': args.deaths,
-      ':assists': args.assists,
-      ':champion': args.champion,
-      ':opponentChampion': args.opponentChampion,
-      ':partner': args.partner,
-      ':opponentPartner': args.opponentPartner,
-      ':csPerMin': args.csPerMin,
-      ':csAt5Min': args.csAt5Min,
-      ':csAt10Min': args.csAt10Min,
-      ':csAt15Min': args.csAt15Min,
-      ':csAt20Min': args.csAt20Min,
-      ':video': args.video,
-      ':updatedAt': new Date().toISOString()
-    },
+    Key: { id: args.id, gameDate: args.gameDate },
+    UpdateExpression: expression,
+    ExpressionAttributeValues: attrVals,
     ReturnValues: 'ALL_NEW'
-  }, callback)).then(result => {
+  };
+
+  if (expAttrName) {
+    updateFields.ExpressionAttributeNames = expAttrName;
+  }
+
+  return promisify(callback => docClient.update(updateFields, callback)).then(result => {
     if (result.Attributes) {
       return result.Attributes;
     }
@@ -620,8 +657,23 @@ type Entry {
   gameId: String
 }
 
+type EntryKey {
+  gameDate: String
+  user: String
+  id: ID
+}
+
+type EntriesResult {
+  entries: [Entry]
+  lastEvaluatedKey: EntryKey
+}
+
 type Query {
-  entriesByUser(user: String!) : [Entry]
+  entriesByUser(
+    user: String!
+    lastEvaluatedGameDate: String
+    lastEvaluatedID: ID
+  ) : EntriesResult
   entryById(id: ID!) : Entry
 }
 
@@ -647,21 +699,13 @@ type Mutation {
 
   updateEntry(
     id: ID!
-    gameDate: String
-    rank: String
-    outcome: String
+    gameDate: String!
     role: String
-    kills: Int
-    deaths: Int
-    assists: Int
     champion: String
     opponentChampion: String
     partner: String
     opponentPartner: String
-    csPerMin: Float
-    cs: [[Int]]
     video: String
-    gameId: String
   ) : Entry
 
   deleteEntry(id: ID!) : Boolean

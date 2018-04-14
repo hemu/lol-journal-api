@@ -22,6 +22,14 @@ function getEntriesByUser(args) {
   const oneYearAgo = new Date();
   oneYearAgo.setDate(oneYearAgo.getDate() - 360);
 
+  const exclusiveStartKey = (
+    args.lastEvaluatedGameDate && args.lastEvaluatedID
+  ) ? {
+    gameDate: args.lastEvaluatedGameDate,
+    user: args.user,
+    id: args.lastEvaluatedID,
+  } : undefined;
+
   return promisify(callback =>
     docClient.query(
       {
@@ -38,10 +46,17 @@ function getEntriesByUser(args) {
           // ':gameDateEnd': oneYearAgo.toISOString(),
         },
         ScanIndexForward: false,
+        Limit: 20,
+        ExclusiveStartKey: exclusiveStartKey,
       },
       callback
     )
-  ).then(result => result.Items);
+  ).then(result => {
+    return {
+      entries: result.Items,
+      lastEvaluatedKey: result.LastEvaluatedKey ? result.LastEvaluatedKey : null,
+    };
+  });
 }
 
 export function entryById(args) {
@@ -64,37 +79,63 @@ export function entryById(args) {
   });
 }
 
+
+function getUpdateExpAndAttrVals(args) {
+  let expression = "set updatedAt = :updatedAt";
+  let includeExpAttrName = false;
+  const expAttrName = {};
+  const attrVals = {
+    ':updatedAt': new Date().toISOString() 
+  }
+  if(args.role) { 
+    expression = `${expression}, #rol = :role` 
+    attrVals[':role'] = args.role;
+    expAttrName['#rol'] = 'role';
+    includeExpAttrName = true;
+  };
+  if(args.champion) {
+    expression = `${expression}, champion = :champion` 
+    attrVals[':champion'] = args.champion;
+  };
+  if(args.opponentChampion) {
+    expression = `${expression}, opponentChampion = :opponentChampion` 
+    attrVals[':opponentChampion'] = args.opponentChampion;
+  };
+  if(args.partner) {
+    expression = `${expression}, partner = :partner` 
+    attrVals[':partner'] = args.partner;
+  };
+  if(args.opponentPartner) {
+    expression = `${expression}, opponentPartner = :opponentPartner` 
+    attrVals[':opponentPartner'] = args.opponentPartner;
+  };
+  if(args.video) {
+    expression = `${expression}, video = :video` 
+    attrVals[':video'] = args.video;
+  };
+  return { expression, attrVals, expAttrName: includeExpAttrName ? expAttrName : null };
+}
+
+
 export function updateEntry(args) {
+  const { expression, attrVals, expAttrName } = getUpdateExpAndAttrVals(args);
+
+  updateFields = {
+    TableName: 'Entry',
+    Key: { id: args.id, gameDate: args.gameDate },
+    UpdateExpression: expression,
+    ExpressionAttributeValues: attrVals,
+    ReturnValues: 'ALL_NEW',
+  }
+
+  if(expAttrName) {
+    updateFields.ExpressionAttributeNames = expAttrName;
+  }
+
+
   return promisify(callback =>
     docClient.update(
-      {
-        TableName: 'Entry',
-        Key: { id: args.id },
-        UpdateExpression:
-          'set #rnk = :rank, updatedAt = :updatedAt, outcome = :outcome, #rol = :role, kills = :kills, deaths = :deaths, assists = :assists, champion = :champion, opponentChampion = :opponentChampion, partner = :partner, opponentPartner = :opponentPartner, csPerMin = :csPerMin, csAt5Min = :csAt5Min, csAt10Min = :csAt10Min, csAt15Min = :csAt15Min, csAt20Min = :csAt20Min, video = :video, gameDate = :gameDate',
-        ExpressionAttributeNames: { '#rnk': 'rank', '#rol': 'role' },
-        ExpressionAttributeValues: {
-          ':gameDate': args.gameDate,
-          ':rank': args.rank,
-          ':outcome': args.outcome,
-          ':role': args.role,
-          ':kills': args.kills,
-          ':deaths': args.deaths,
-          ':assists': args.assists,
-          ':champion': args.champion,
-          ':opponentChampion': args.opponentChampion,
-          ':partner': args.partner,
-          ':opponentPartner': args.opponentPartner,
-          ':csPerMin': args.csPerMin,
-          ':csAt5Min': args.csAt5Min,
-          ':csAt10Min': args.csAt10Min,
-          ':csAt15Min': args.csAt15Min,
-          ':csAt20Min': args.csAt20Min,
-          ':video': args.video,
-          ':updatedAt': new Date().toISOString(),
-        },
-        ReturnValues: 'ALL_NEW',
-      },
+      updateFields,
       callback
     )
   )
