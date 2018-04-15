@@ -1,4 +1,4 @@
-service: serverless-graphql-dynamo
+service: lol-journal-api
 
 frameworkVersion: ">=1.21.0 <2.0.0"
 
@@ -17,7 +17,17 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:us-east-1:*:table/entry"
+      Resource: "arn:aws:dynamodb:us-east-1:*:table/Entry/*"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:BatchGetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:us-east-1:*:table/Note/*"
 
 plugins:
   - serverless-webpack
@@ -41,8 +51,6 @@ custom:
             sources: [seed-data/entry.json]
           - table: Note
             sources: [seed-data/note.json]
-          - table: NoteType
-            sources: [seed-data/noteType.json]
 
 functions:
   graphql:
@@ -51,6 +59,10 @@ functions:
     - http:
         path: graphql
         method: post
+        cors: true
+    - http:
+        path: graphql
+        method: get
         cors: true
   playground:
     handler: handler.playgroundHandler
@@ -69,28 +81,6 @@ functions:
 
 resources:
   Resources:
-    NoteTypeTable:
-      Type: 'AWS::DynamoDB::Table'
-      Properties:
-        TableName: 'NoteType'
-        KeySchema:
-          -
-            AttributeName: id
-            KeyType: HASH
-          -
-            AttributeName: user
-            KeyType: RANGE
-        AttributeDefinitions:
-          -
-            AttributeName: id
-            AttributeType: S
-          -
-            AttributeName: user
-            AttributeType: S
-        ProvisionedThroughput:
-          ReadCapacityUnits: 10
-          WriteCapacityUnits: 10
-
     EntryTable:
       Type: 'AWS::DynamoDB::Table'
       Properties:

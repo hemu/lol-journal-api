@@ -2,7 +2,7 @@ Arguments:
   /Users/hemu/.nvm/versions/node/v8.4.0/bin/node /usr/local/Cellar/yarn/1.5.1_1/libexec/bin/yarn.js start
 
 PATH: 
-  /Users/hemu/.npm-packages/bin::/Users/hemu/Documents/dev-go-ws/bin:/Users/hemu/.npm-packages/bin::/Users/hemu/Documents/dev-go-ws/bin:/Users/hemu/.nvm/versions/node/v8.4.0/bin:/Users/hemu/.rvm/gems/ruby-2.3.1/bin:/Users/hemu/.rvm/gems/ruby-2.3.1@global/bin:/Users/hemu/.rvm/rubies/ruby-2.3.1/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/go/bin:/Library/TeX/texbin:/Users/hemu/.npm-packages/bin:/Users/hemu/Documents/dev-go-ws/bin:/Applications/Postgres.app/Contents/Versions/latest/bin:/Users/hemu/.rvm/bin:/Users/hemu/.rvm/bin:/Applications/Postgres.app/Contents/Versions/latest/bin:/Users/hemu/.rvm/bin:/Applications/Postgres.app/Contents/Versions/latest/bin:/Users/hemu/.rvm/bin:/Users/hemu/.rvm/bin:/Users/hemu/.rvm/bin:/Users/hemu/.rvm/bin:/Users/hemu/.rvm/bin
+  /Users/hemu/anaconda/bin:/Users/hemu/.npm-packages/bin::/Users/hemu/Documents/dev-go-ws/bin:/Users/hemu/.npm-packages/bin::/Users/hemu/Documents/dev-go-ws/bin:/Users/hemu/.nvm/versions/node/v8.4.0/bin:/Users/hemu/.rvm/gems/ruby-2.3.1/bin:/Users/hemu/.rvm/gems/ruby-2.3.1@global/bin:/Users/hemu/.rvm/rubies/ruby-2.3.1/bin:/Users/hemu/anaconda/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/go/bin:/Library/TeX/texbin:/Users/hemu/.npm-packages/bin:/Users/hemu/Documents/dev-go-ws/bin:/Applications/Postgres.app/Contents/Versions/latest/bin:/Users/hemu/.rvm/bin:/Users/hemu/.rvm/bin:/Applications/Postgres.app/Contents/Versions/latest/bin:/Users/hemu/.rvm/bin:/Applications/Postgres.app/Contents/Versions/latest/bin:/Users/hemu/.rvm/bin:/Users/hemu/.rvm/bin
 
 Yarn version: 
   1.5.1
