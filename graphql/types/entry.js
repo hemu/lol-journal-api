@@ -73,7 +73,10 @@ type Mutation {
     video: String
   ) : Entry
 
-  deleteEntry(id: ID!) : Boolean
+  deleteEntry(
+    id: ID!
+    gameDate: String!
+  ) : Boolean
 }
 
 `;

@@ -1,7 +1,7 @@
 import uuid from 'uuid';
 import dynamodb from 'serverless-dynamodb-client';
 import { isEmpty } from 'lodash';
-import { getNotesByEntry, createNote } from './note';
+import { notesByEntry, createNote } from './note';
 import { SystemNoteTypeIds } from '../const';
 
 const docClient = dynamodb.doc; // return an instance of new AWS.DynamoDB.DocumentClient()
@@ -196,7 +196,7 @@ function notesToDeleteRequests(notes, entry) {
 
 export function deleteEntry(args) {
   // query for ids first
-  return getNotesByEntry({ entry: args.id })
+  return notesByEntry({ entry: args.id })
     .then(notes =>
       promisify(callback =>
         docClient.batchWrite(
@@ -205,7 +205,7 @@ export function deleteEntry(args) {
               Entry: [
                 {
                   DeleteRequest: {
-                    Key: { id: args.id },
+                    Key: { id: args.id, gameDate: args.gameDate },
                   },
                 },
               ],
