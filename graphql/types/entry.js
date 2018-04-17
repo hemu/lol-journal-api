@@ -20,6 +20,7 @@ type Entry {
   cs: [[Int]]
   video: String
   gameId: String
+  regionId: String
 }
 
 type EntryKey {
@@ -46,6 +47,7 @@ type Mutation {
   createEntry(
     user: String!
     gameId: String!
+    regionId: String!
     gameDate: String
     rank: String
     outcome: String

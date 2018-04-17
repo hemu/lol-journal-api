@@ -43,14 +43,14 @@ custom:
       port: 8000
       inMemory: true
       migrate: true
-      seed: true
-    seed:
-      test:
-        sources:
-          - table: Entry
-            sources: [seed-data/entry.json]
-          - table: Note
-            sources: [seed-data/note.json]
+      # seed: true
+    # seed:
+      # test:
+      #   sources:
+      #     - table: Entry
+      #       sources: [seed-data/entry.json]
+      #     - table: Note
+      #       sources: [seed-data/note.json]
 
 functions:
   graphql:

@@ -270,15 +270,24 @@ function notesToDeleteRequests(notes, entry) {
 
 function deleteEntry(args) {
   // query for ids first
-  return (0, _note.notesByEntry)({ entry: args.id }).then(notes => promisify(callback => docClient.batchWrite({
-    RequestItems: {
+
+  function requestItems(notes) {
+    const items = {
       Entry: [{
         DeleteRequest: {
           Key: { id: args.id, gameDate: args.gameDate }
         }
-      }],
-      Note: notesToDeleteRequests(notes, args.id)
+      }]
+    };
+
+    if (notes && notes.length > 0) {
+      items.Note = notesToDeleteRequests(notes, args.id);
     }
+    return items;
+  }
+
+  return (0, _note.notesByEntry)({ entry: args.id }).then(notes => promisify(callback => docClient.batchWrite({
+    RequestItems: requestItems(notes)
   }, callback))).then(result => {
     if (result.UnprocessedItems) {
       return (0, _lodash.isEmpty)(result.UnprocessedItems);
@@ -655,6 +664,7 @@ type Entry {
   cs: [[Int]]
   video: String
   gameId: String
+  regionId: String
 }
 
 type EntryKey {
@@ -681,6 +691,7 @@ type Mutation {
   createEntry(
     user: String!
     gameId: String!
+    regionId: String!
     gameDate: String
     rank: String
     outcome: String

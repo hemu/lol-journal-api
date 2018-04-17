@@ -196,21 +196,31 @@ function notesToDeleteRequests(notes, entry) {
 
 export function deleteEntry(args) {
   // query for ids first
+
+  function requestItems(notes) {
+    const items = {
+      Entry: [
+        {
+          DeleteRequest: {
+            Key: { id: args.id, gameDate: args.gameDate },
+          },
+        },
+      ],
+    }
+
+    if(notes && notes.length > 0) {
+      items.Note = notesToDeleteRequests(notes, args.id);
+    }
+    return items;
+  }
+
+  
   return notesByEntry({ entry: args.id })
     .then(notes =>
       promisify(callback =>
         docClient.batchWrite(
           {
-            RequestItems: {
-              Entry: [
-                {
-                  DeleteRequest: {
-                    Key: { id: args.id, gameDate: args.gameDate },
-                  },
-                },
-              ],
-              Note: notesToDeleteRequests(notes, args.id),
-            },
+            RequestItems: requestItems(notes),
           },
           callback
         )
