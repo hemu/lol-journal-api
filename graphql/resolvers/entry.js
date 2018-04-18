@@ -30,21 +30,26 @@ function getEntriesByUser(args) {
     id: args.lastEvaluatedID,
   } : undefined;
 
+  let keyConditionExpression = "#usr = :user";
+  const expAttrVals = {
+    ':user': args.user,
+  }
+  if(args.champion) {
+    keyConditionExpression = `${keyConditionExpression} and champion = :champion`;
+    expAttrVals[":champion"] = args.champion;
+  }
+
   return promisify(callback =>
     docClient.query(
       {
         TableName: 'Entry',
         IndexName: 'EntryUserIndex',
-        KeyConditionExpression: '#usr = :user',
+        KeyConditionExpression: keyConditionExpression,
         // FilterExpression: 'gameDate between :gameDateEnd and :gameDate',
         ExpressionAttributeNames: {
           '#usr': 'user',
         },
-        ExpressionAttributeValues: {
-          ':user': args.user,
-          // ':gDate': new Date().toISOString(),
-          // ':gameDateEnd': oneYearAgo.toISOString(),
-        },
+        ExpressionAttributeValues: expAttrVals,
         ScanIndexForward: false,
         Limit: 20,
         ExclusiveStartKey: exclusiveStartKey,

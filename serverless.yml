@@ -102,6 +102,9 @@ resources:
           -
             AttributeName: gameDate
             AttributeType: S
+          -
+            AttributeName: champion
+            AttributeType: S
         ProvisionedThroughput:
           ReadCapacityUnits: 10
           WriteCapacityUnits: 10
@@ -113,7 +116,7 @@ resources:
               AttributeName: user
               KeyType: HASH
             -
-              AttributeName: gameDate
+              AttributeName: champion
               KeyType: RANGE
           Projection:
             NonKeyAttributes:

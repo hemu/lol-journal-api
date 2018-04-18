@@ -37,6 +37,7 @@ type EntriesResult {
 type Query {
   entriesByUser(
     user: String!
+    champion: String
     lastEvaluatedGameDate: String
     lastEvaluatedID: ID
   ) : EntriesResult
