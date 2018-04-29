@@ -663,6 +663,7 @@ type Entry {
   assists: Int
   champion: String
   opponentChampion: String
+  opponents: [String]
   partner: String
   opponentPartner: String
   csPerMin: Float
@@ -707,6 +708,7 @@ type Mutation {
     assists: Int
     champion: String
     opponentChampion: String
+    opponents: [String]
     partner: String
     opponentPartner: String
     csPerMin: Float
