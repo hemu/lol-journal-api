@@ -757,6 +757,7 @@ type Note {
   user: String!
   marked: Boolean
   text: String
+  meta: String
   type: String
 }
 
@@ -772,6 +773,7 @@ extend type Mutation {
     marked: Boolean!
     text: String
     type: String
+    meta: String
   ) : Note
 
   markNote(

@@ -154,8 +154,8 @@ resources:
             AttributeName: user
             AttributeType: S
           -
-            AttributeName: marked
-            AttributeType: N
+            AttributeName: type
+            AttributeType: S
         ProvisionedThroughput:
           ReadCapacityUnits: 10
           WriteCapacityUnits: 10
@@ -167,12 +167,12 @@ resources:
               AttributeName: user
               KeyType: HASH
             -
-              AttributeName: marked
+              AttributeName: type
               KeyType: RANGE
           Projection:
             NonKeyAttributes:
-              - type
               - text
+              - meta
             ProjectionType: INCLUDE
           ProvisionedThroughput:
             ReadCapacityUnits: 5
