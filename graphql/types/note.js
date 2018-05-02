@@ -7,7 +7,7 @@ type Note {
   user: String!
   marked: Boolean
   text: String
-  meta: String
+  meta: [String]
   type: String
 }
 
@@ -23,7 +23,7 @@ extend type Mutation {
     marked: Boolean!
     text: String
     type: String
-    meta: String
+    meta: [String]
   ) : Note
 
   markNote(
@@ -40,6 +40,4 @@ extend type Mutation {
 
   deleteNote(id: ID!, entry: ID!) : Note
 }
-
-
 `;

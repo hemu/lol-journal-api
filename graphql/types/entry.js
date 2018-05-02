@@ -11,6 +11,7 @@ type Entry {
   role: String
   kills: Int
   deaths: Int
+  deathTimes: [String]
   assists: Int
   champion: String
   opponentChampion: String
@@ -56,6 +57,7 @@ type Mutation {
     role: String
     kills: Int
     deaths: Int
+    deathTimes: [String]
     assists: Int
     champion: String
     opponentChampion: String

@@ -660,6 +660,7 @@ type Entry {
   role: String
   kills: Int
   deaths: Int
+  deathTimes: [String]
   assists: Int
   champion: String
   opponentChampion: String
@@ -705,6 +706,7 @@ type Mutation {
     role: String
     kills: Int
     deaths: Int
+    deathTimes: [String]
     assists: Int
     champion: String
     opponentChampion: String
@@ -757,7 +759,7 @@ type Note {
   user: String!
   marked: Boolean
   text: String
-  meta: String
+  meta: [String]
   type: String
 }
 
@@ -773,7 +775,7 @@ extend type Mutation {
     marked: Boolean!
     text: String
     type: String
-    meta: String
+    meta: [String]
   ) : Note
 
   markNote(
@@ -790,8 +792,6 @@ extend type Mutation {
 
   deleteNote(id: ID!, entry: ID!) : Note
 }
-
-
 `;
 
 
